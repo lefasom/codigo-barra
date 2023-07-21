@@ -20,12 +20,27 @@ const App = () => {
     const initCamera = async () => {
       try {
         const videoInputDevices = await codeReader.current.listVideoInputDevices();
+        let constraints;
+
         if (videoInputDevices && videoInputDevices.length > 0) {
-          const constraints = {
-            video: {
-              deviceId: videoInputDevices[0].deviceId,
-            },
-          };
+          // Encuentra la cámara trasera, si está disponible
+          const rearCamera = videoInputDevices.find((device) => device.label.toLowerCase().includes('rear'));
+
+          if (rearCamera) {
+            constraints = {
+              video: {
+                deviceId: { exact: rearCamera.deviceId },
+              },
+            };
+          } else {
+            // Si no hay cámara trasera, usa la primera cámara disponible
+            constraints = {
+              video: {
+                deviceId: { exact: videoInputDevices[0].deviceId },
+              },
+            };
+          }
+
           await codeReader.current.decodeFromConstraints(constraints, videoRef.current, handleScan);
         } else {
           console.error('No se encontraron dispositivos de video.');
