@@ -41,6 +41,8 @@ const App = () => {
             };
           }
 
+          // Asegurarse de cerrar la cámara actual antes de usar la nueva cámara
+          await codeReader.current.reset();
           await codeReader.current.decodeFromConstraints(constraints, videoRef.current, handleScan);
         } else {
           console.error('No se encontraron dispositivos de video.');
