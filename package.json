@@ -11,10 +11,11 @@
   },
   "dependencies": {
     "@zxing/library": "^0.20.0",
+    "instascan": "^1.0.0",
     "quagga": "^0.12.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-qr-scanner": "^1.0.0-alpha.11"
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-webcam-barcode-scanner": "^0.0.2-rc2"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

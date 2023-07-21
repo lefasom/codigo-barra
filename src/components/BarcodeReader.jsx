@@ -1,39 +1,66 @@
 import React, { useRef, useEffect } from 'react';
-import { BrowserMultiFormatReader } from '@zxing/library';
+import Quagga from 'quagga';
 
 const BarcodeReader = () => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    const codeReader = new BrowserMultiFormatReader();
-
-    const startScanner = async () => {
-      try {
-        const constraints = { video: true };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoRef.current.srcObject = stream;
-
-        codeReader.decodeFromVideoDevice(null, videoRef.current, (result, err) => {
-          if (result) {
-            console.log('Barcode detected:', result.getText());
-          }
-          if (err) {
-            console.error('Error reading barcode:', err);
-          }
-        });
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-      }
+    const constraints = {
+      video: true,
     };
 
-    startScanner();
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then((stream) => {
+        videoRef.current.srcObject = stream;
+      })
+      .catch((error) => {
+        console.error('Error accessing camera:', error);
+      });
+
+    Quagga.init({
+      inputStream: {
+        constraints: {
+          video: true,
+        },
+        area: {
+          top: '0%',
+          right: '0%',
+          left: '0%',
+          bottom: '0%',
+        },
+        singleChannel: false,
+      },
+      locate: true,
+      decoder: {
+        readers: ['ean_reader'], // Specify the barcode format you want to read (EAN in this case)
+      },
+    }, (err) => {
+      if (err) {
+        console.error('Error initializing Quagga:', err);
+      } else {
+        Quagga.start();
+      }
+    });
+
+    Quagga.onDetected(handleBarcodeDetected);
 
     return () => {
-      codeReader.reset();
+      Quagga.offDetected(handleBarcodeDetected);
+      Quagga.stop();
     };
   }, []);
 
-  return <video ref={videoRef} style={{ width: '100%', height: 'auto' }} />;
+  const handleBarcodeDetected = (result) => {
+    if (result && result.codeResult && result.codeResult.code) {
+      alert(`Barcode detected: ${result.codeResult.code}`);
+    }
+  };
+
+  return (
+    <div>
+      <video ref={videoRef} style={{ width: '100%', height: 'auto' }} />
+    </div>
+  );
 };
 
 export default BarcodeReader;
